@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Votación Blockchain</title>
+</head>
+
+<body>
+
+    <h1>Sistema de Votación con Blockchain</h1>
+
+    <button onclick="conectarMetaMask()">Conectar MetaMask</button>
+
+    <p id="cuenta"></p>
+
+    <h2>Seleccione una opción</h2>
+
+    <button onclick="votar(0)">Votar Candidato A</button>
+    <button onclick="votar(1)">Votar Candidato B</button>
+    <button onclick="votar(2)">Votar Candidato C</button>
+
+    <h2>Resultados</h2>
+
+    <button onclick="consultarResultados()">Consultar resultados</button>
+
+    <div id="resultados"></div>
+
+    <p id="mensaje"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+    <script>
+        let web3;
+        let cuenta;
+        let contrato;
+
+        const direccionContrato = "0x5CDB4bd52a86122F222E27C03cEa285700a89Fcb";
+
+        const abiContrato = [
+            [
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "_votante",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "habilitarVotante",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "votante",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "VotanteHabilitado",
+                    "type": "event"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_opcionId",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "votar",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "votante",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "opcionId",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "VotoEmitido",
+                    "type": "event"
+                },
+                {
+                    "inputs": [],
+                    "name": "administrador",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "cantidadOpciones",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_opcionId",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "consultarVotos",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "haVotado",
+                    "outputs": [
+                        {
+                            "internalType": "bool",
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_opcionId",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "obtenerOpcion",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "opciones",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "id",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "nombre",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "votos",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "votantesHabilitados",
+                    "outputs": [
+                        {
+                            "internalType": "bool",
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ]
+        ];
+
+        async function conectarMetaMask() {
+            if (typeof window.ethereum !== "undefined") {
+                web3 = new Web3(window.ethereum);
+
+                const cuentas = await window.ethereum.request({
+                    method: "eth_requestAccounts"
+                });
+
+                cuenta = cuentas[0];
+
+                document.getElementById("cuenta").innerText =
+                    "Cuenta conectada: " + cuenta;
+
+                contrato = new web3.eth.Contract(abiContrato, direccionContrato);
+            } else {
+                alert("Debe instalar MetaMask para utilizar el sistema.");
+            }
+        }
+
+        async function votar(opcionId) {
+            try {
+                await contrato.methods.votar(opcionId).send({ from: cuenta });
+
+                document.getElementById("mensaje").innerText =
+                    "Voto registrado correctamente.";
+            } catch (error) {
+                document.getElementById("mensaje").innerText =
+                    "Error al votar: " + error.message;
+            }
+        }
+
+        async function consultarResultados() {
+            let html = "";
+
+            for (let i = 0; i < 3; i++) {
+                const opcion = await contrato.methods.obtenerOpcion(i).call();
+                html += "<p>" + opcion[1] + ": " + opcion[2] + " votos</p>";
+            }
+
+            document.getElementById("resultados").innerHTML = html;
+        }
+    </script>
+
+</body>
+
+</html>
