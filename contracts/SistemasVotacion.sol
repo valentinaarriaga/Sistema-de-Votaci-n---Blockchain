@@ -16,11 +16,25 @@ contract SistemaVotacion {
     mapping(bytes32 => bool) public votantesHabilitados;
     mapping(bytes32 => bool) public haVotado;
 
+    // Gobernanza tipo DAO
+    mapping(address => bool) public administradoresDAO;
+    uint256 public cantidadAdministradoresDAO;
+    uint256 public aprobacionesNecesarias;
+
+    mapping(bytes32 => uint256) public cantidadAprobacionesVotante;
+    mapping(bytes32 => mapping(address => bool)) public aprobacionesRealizadas;
+
     event VotanteHabilitado(bytes32 hashVotante);
     event VotoEmitido(bytes32 hashVotante, uint256 opcionId);
+    event AdministradorDAOAgregado(address administradorDAO);
+    event AprobacionVotante(address administradorDAO, bytes32 hashVotante, uint256 totalAprobaciones);
 
     constructor() {
         administrador = msg.sender;
+
+        administradoresDAO[msg.sender] = true;
+        cantidadAdministradoresDAO = 1;
+        aprobacionesNecesarias = 2;
 
         opciones.push(Opcion(0, "Candidato A", 0));
         opciones.push(Opcion(1, "Candidato B", 0));
@@ -28,12 +42,48 @@ contract SistemaVotacion {
     }
 
     modifier soloAdministrador() {
-        require(msg.sender == administrador, "Solo el administrador puede realizar esta accion");
+        require(msg.sender == administrador, "Solo el administrador principal puede realizar esta accion");
+        _;
+    }
+
+    modifier soloAdministradorDAO() {
+        require(administradoresDAO[msg.sender], "Solo un administrador DAO puede aprobar votantes");
         _;
     }
 
     function generarHashVotante(address _votante) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(_votante));
+    }
+
+    function agregarAdministradorDAO(address _nuevoAdministrador) public soloAdministrador {
+        require(_nuevoAdministrador != address(0), "Direccion invalida");
+        require(!administradoresDAO[_nuevoAdministrador], "Ya es administrador DAO");
+
+        administradoresDAO[_nuevoAdministrador] = true;
+        cantidadAdministradoresDAO++;
+
+        emit AdministradorDAOAgregado(_nuevoAdministrador);
+    }
+
+    function aprobarVotante(address _votante) public soloAdministradorDAO {
+        bytes32 hashVotante = generarHashVotante(_votante);
+
+        require(!votantesHabilitados[hashVotante], "El votante ya esta habilitado");
+        require(!aprobacionesRealizadas[hashVotante][msg.sender], "Este administrador ya aprobo al votante");
+
+        aprobacionesRealizadas[hashVotante][msg.sender] = true;
+        cantidadAprobacionesVotante[hashVotante]++;
+
+        emit AprobacionVotante(
+            msg.sender,
+            hashVotante,
+            cantidadAprobacionesVotante[hashVotante]
+        );
+
+        if (cantidadAprobacionesVotante[hashVotante] >= aprobacionesNecesarias) {
+            votantesHabilitados[hashVotante] = true;
+            emit VotanteHabilitado(hashVotante);
+        }
     }
 
     function habilitarVotante(address _votante) public soloAdministrador {
@@ -82,5 +132,14 @@ contract SistemaVotacion {
     function consultarSiEstaHabilitado(address _votante) public view returns (bool) {
         bytes32 hashVotante = generarHashVotante(_votante);
         return votantesHabilitados[hashVotante];
+    }
+
+    function consultarAprobaciones(address _votante) public view returns (uint256) {
+        bytes32 hashVotante = generarHashVotante(_votante);
+        return cantidadAprobacionesVotante[hashVotante];
+    }
+
+    function consultarSiEsAdministradorDAO(address _cuenta) public view returns (bool) {
+        return administradoresDAO[_cuenta];
     }
 }

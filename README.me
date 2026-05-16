@@ -90,6 +90,24 @@ Ganache Blockchain Local
 
 ---
 
+## Descentralización y Gobernanza
+
+Como mejora frente a la centralización inicial del sistema, se incorporó una lógica básica de gobernanza inspirada en una DAO.
+
+En la primera versión, una única cuenta administradora tenía la capacidad de habilitar votantes. Esto generaba un punto central de control, ya que una sola persona podía decidir quién participaba en la votación.
+
+En la versión mejorada, se agregó un mecanismo de aprobaciones múltiples:
+
+- existen administradores DAO;
+- cada administrador DAO puede aprobar la habilitación de un votante;
+- un votante solo queda habilitado cuando alcanza la cantidad mínima de aprobaciones requeridas;
+- se evita que el mismo administrador apruebe dos veces al mismo votante;
+- las aprobaciones quedan registradas mediante eventos del contrato.
+
+Este mecanismo no representa una DAO completa de producción, pero funciona como una primera aproximación académica a la gobernanza descentralizada, reduciendo la dependencia de un único administrador y distribuyendo la toma de decisiones entre varios participantes.
+
+---
+
 # Cómo Ejecutar el Proyecto
 
 ## 1. Iniciar Ganache
