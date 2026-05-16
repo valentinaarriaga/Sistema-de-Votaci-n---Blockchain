@@ -4,29 +4,262 @@
 <head>
     <meta charset="UTF-8">
     <title>Sistema de Votación Blockchain</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #111827, #1e293b, #312e81);
+            color: #f9fafb;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 22px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #334155;
+            color: #e2e8f0;
+            font-size: 14px;
+            word-break: break-all;
+            display: inline-block;
+        }
+
+        .badge.success {
+            background: rgba(34, 197, 94, 0.18);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+
+        .badge.warning {
+            background: rgba(234, 179, 8, 0.18);
+            color: #fde68a;
+            border: 1px solid rgba(234, 179, 8, 0.35);
+        }
+
+        .form-control {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: #1e293b;
+            color: #f9fafb;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            opacity: 0.92;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .candidates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 16px;
+        }
+
+        .candidate {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            text-align: center;
+        }
+
+        .candidate h3 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .candidate p {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .results {
+            margin-top: 18px;
+        }
+
+        .result-item {
+            margin-bottom: 16px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .bar {
+            width: 100%;
+            height: 14px;
+            background: #334155;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #6366f1);
+            transition: width 0.4s ease;
+        }
+
+        #mensaje {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 12px;
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            min-height: 48px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+        .info-line {
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Sistema de Votación con Blockchain</h1>
+    <div class="container">
 
-    <button onclick="conectarMetaMask()">Conectar MetaMask</button>
+        <div class="header">
+            <h1>Sistema de Votación con Blockchain</h1>
+        </div>
 
-    <p id="cuenta"></p>
+        <div class="card">
+            <div class="status">
+                <div>
+                    <h2>Estado de conexión</h2>
+                    <p id="cuenta" class="badge warning">No conectado</p>
 
-    <h2>Seleccione una opción</h2>
+                    <select id="selectorCuenta" class="form-control" onchange="cambiarCuenta()" disabled>
+                        <option>Conectá Ganache para ver las cuentas</option>
+                    </select>
+                </div>
 
-    <button onclick="votar(0)">Votar Candidato A</button>
-    <button onclick="votar(1)">Votar Candidato B</button>
-    <button onclick="votar(2)">Votar Candidato C</button>
+                <button class="btn-primary" onclick="conectarGanache()">Conectar Ganache</button>
+            </div>
+        </div>
 
-    <h2>Resultados</h2>
+        <div class="card">
+            <h2>Seleccione una opción</h2>
 
-    <button onclick="consultarResultados()">Consultar resultados</button>
+            <div class="candidates">
+                <div class="candidate">
+                    <h3>Candidato A</h3>
+                    <p>Opción 0</p>
+                    <button class="btn-secondary vote-button" onclick="votar(0)" disabled>Votar</button>
+                </div>
 
-    <div id="resultados"></div>
+                <div class="candidate">
+                    <h3>Candidato B</h3>
+                    <p>Opción 1</p>
+                    <button class="btn-secondary vote-button" onclick="votar(1)" disabled>Votar</button>
+                </div>
 
-    <p id="mensaje"></p>
+                <div class="candidate">
+                    <h3>Candidato C</h3>
+                    <p>Opción 2</p>
+                    <button class="btn-secondary vote-button" onclick="votar(2)" disabled>Votar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Resultados en tiempo real</h2>
+
+            <div id="resultados" class="results">
+                <p class="badge warning">Conectá Ganache para visualizar los resultados.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Estado del votante</h2>
+
+            <div id="estadoVotante">
+                <p class="badge warning">Conectá Ganache para consultar el estado del votante.</p>
+            </div>
+        </div>
+
+        <div id="mensaje">Esperando conexión con Ganache...</div>
+
+        <div class="footer">
+            Base de Datos Avanzada · Sistema de Votación Blockchain
+        </div>
+
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 
@@ -34,258 +267,428 @@
         let web3;
         let cuenta;
         let contrato;
+        let cuentasGanache = [];
 
-        const direccionContrato = "0x5CDB4bd52a86122F222E27C03cEa285700a89Fcb";
+        const direccionContrato = "0xd8C2401ae5c48757e39b430Dee8e06Ffe91eD645";
 
         const abiContrato = [
-            [
-                {
-                    "inputs": [
-                        {
-                            "internalType": "address",
-                            "name": "_votante",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "habilitarVotante",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "constructor"
-                },
-                {
-                    "anonymous": false,
-                    "inputs": [
-                        {
-                            "indexed": false,
-                            "internalType": "address",
-                            "name": "votante",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "VotanteHabilitado",
-                    "type": "event"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "_opcionId",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "votar",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "anonymous": false,
-                    "inputs": [
-                        {
-                            "indexed": false,
-                            "internalType": "address",
-                            "name": "votante",
-                            "type": "address"
-                        },
-                        {
-                            "indexed": false,
-                            "internalType": "uint256",
-                            "name": "opcionId",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "VotoEmitido",
-                    "type": "event"
-                },
-                {
-                    "inputs": [],
-                    "name": "administrador",
-                    "outputs": [
-                        {
-                            "internalType": "address",
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "name": "cantidadOpciones",
-                    "outputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "_opcionId",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "consultarVotos",
-                    "outputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "address",
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "haVotado",
-                    "outputs": [
-                        {
-                            "internalType": "bool",
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "_opcionId",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "obtenerOpcion",
-                    "outputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "string",
-                            "name": "",
-                            "type": "string"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "opciones",
-                    "outputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "id",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "string",
-                            "name": "nombre",
-                            "type": "string"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "votos",
-                            "type": "uint256"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [
-                        {
-                            "internalType": "address",
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "votantesHabilitados",
-                    "outputs": [
-                        {
-                            "internalType": "bool",
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                }
-            ]
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "bytes32",
+                        "name": "hashVotante",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "opcionId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "VotoEmitido",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "bytes32",
+                        "name": "hashVotante",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "VotanteHabilitado",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "administrador",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "cantidadOpciones",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_votante",
+                        "type": "address"
+                    }
+                ],
+                "name": "consultarSiEstaHabilitado",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_votante",
+                        "type": "address"
+                    }
+                ],
+                "name": "consultarSiVoto",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_opcionId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "consultarVotos",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_votante",
+                        "type": "address"
+                    }
+                ],
+                "name": "generarHashVotante",
+                "outputs": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "stateMutability": "pure",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_votante",
+                        "type": "address"
+                    }
+                ],
+                "name": "habilitarVotante",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_opcionId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "obtenerOpcion",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "opciones",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "nombre",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "votos",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_opcionId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "votar",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
         ];
 
-        async function conectarMetaMask() {
-            if (typeof window.ethereum !== "undefined") {
-                web3 = new Web3(window.ethereum);
+        async function conectarGanache() {
+            try {
+                web3 = new Web3("http://127.0.0.1:7545");
 
-                const cuentas = await window.ethereum.request({
-                    method: "eth_requestAccounts"
-                });
-
-                cuenta = cuentas[0];
-
-                document.getElementById("cuenta").innerText =
-                    "Cuenta conectada: " + cuenta;
+                cuentasGanache = await web3.eth.getAccounts();
+                cuenta = cuentasGanache[0];
 
                 contrato = new web3.eth.Contract(abiContrato, direccionContrato);
-            } else {
-                alert("Debe instalar MetaMask para utilizar el sistema.");
+
+                const codigoContrato = await web3.eth.getCode(direccionContrato);
+
+                if (codigoContrato === "0x") {
+                    mostrarMensaje("No existe un contrato desplegado en esa dirección.", "error");
+                    return;
+                }
+
+                cargarSelectorCuentas();
+
+                document.getElementById("cuenta").innerText = "Conectado: " + cuenta;
+                document.getElementById("cuenta").className = "badge success";
+
+                await consultarResultados();
+                await actualizarEstadoVotante();
+
+            } catch (error) {
+                mostrarMensaje("Error al conectar con Ganache: " + error.message, "error");
             }
+        }
+
+        function cargarSelectorCuentas() {
+            const selector = document.getElementById("selectorCuenta");
+            selector.innerHTML = "";
+
+            cuentasGanache.forEach((direccion, index) => {
+                const option = document.createElement("option");
+                option.value = direccion;
+                option.textContent = `Cuenta ${index}: ${direccion}`;
+                selector.appendChild(option);
+            });
+
+            selector.disabled = false;
+            selector.value = cuenta;
+        }
+
+        async function cambiarCuenta() {
+            cuenta = document.getElementById("selectorCuenta").value;
+
+            document.getElementById("cuenta").innerText = "Conectado: " + cuenta;
+            document.getElementById("cuenta").className = "badge success";
+
+            await actualizarEstadoVotante();
         }
 
         async function votar(opcionId) {
             try {
+                if (!contrato) {
+                    mostrarMensaje("Primero debe conectar con Ganache.", "error");
+                    return;
+                }
+
                 await contrato.methods.votar(opcionId).send({ from: cuenta });
 
-                document.getElementById("mensaje").innerText =
-                    "Voto registrado correctamente.";
+                mostrarMensaje("Voto registrado correctamente.", "success");
+
+                await consultarResultados();
+                await actualizarEstadoVotante();
+
             } catch (error) {
-                document.getElementById("mensaje").innerText =
-                    "Error al votar: " + error.message;
+                const mensaje = traducirError(error.message);
+                mostrarMensaje(mensaje, "error");
+                await actualizarEstadoVotante();
             }
         }
 
         async function consultarResultados() {
-            let html = "";
+            try {
+                if (!contrato) {
+                    mostrarMensaje("Primero debe conectar con Ganache.", "error");
+                    return;
+                }
 
-            for (let i = 0; i < 3; i++) {
-                const opcion = await contrato.methods.obtenerOpcion(i).call();
-                html += "<p>" + opcion[1] + ": " + opcion[2] + " votos</p>";
+                const nombres = ["Candidato A", "Candidato B", "Candidato C"];
+                const votos = [];
+
+                let total = 0;
+
+                for (let i = 0; i < 3; i++) {
+                    const cantidad = Number(await contrato.methods.consultarVotos(i).call());
+                    votos.push(cantidad);
+                    total += cantidad;
+                }
+
+                let html = "";
+
+                for (let i = 0; i < 3; i++) {
+                    const porcentaje = total === 0 ? 0 : Math.round((votos[i] / total) * 100);
+
+                    html += `
+                        <div class="result-item">
+                            <div class="result-header">
+                                <strong>${nombres[i]}</strong>
+                                <span>${votos[i]} votos · ${porcentaje}%</span>
+                            </div>
+                            <div class="bar">
+                                <div class="bar-fill" style="width: ${porcentaje}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById("resultados").innerHTML = html;
+
+            } catch (error) {
+                mostrarMensaje("Error al consultar resultados: " + error.message, "error");
+            }
+        }
+
+        async function actualizarEstadoVotante() {
+            try {
+                const habilitado = await contrato.methods.consultarSiEstaHabilitado(cuenta).call();
+                const yaVoto = await contrato.methods.consultarSiVoto(cuenta).call();
+                const hash = await contrato.methods.generarHashVotante(cuenta).call();
+
+                const puedeVotar = habilitado && !yaVoto;
+
+                let html = `
+                    <p class="info-line"><strong>Cuenta seleccionada:</strong> ${cuenta}</p>
+                    <p class="info-line"><strong>Hash del votante:</strong> ${hash}</p>
+                    <p class="info-line"><strong>Habilitado:</strong> ${habilitado ? "Sí" : "No"}</p>
+                    <p class="info-line"><strong>Ya votó:</strong> ${yaVoto ? "Sí" : "No"}</p>
+                `;
+
+                document.getElementById("estadoVotante").innerHTML = html;
+
+                actualizarBotonesVoto(puedeVotar);
+
+                if (habilitado && !yaVoto) {
+                    mostrarMensaje("Cuenta habilitada para votar.", "success");
+                } else if (habilitado && yaVoto) {
+                    mostrarMensaje("Esta cuenta ya emitió su voto.", "success");
+                } else {
+                    mostrarMensaje("Esta cuenta todavía no está habilitada para votar.", "error");
+                }
+
+            } catch (error) {
+                actualizarBotonesVoto(false);
+                mostrarMensaje("No se pudo consultar el estado del votante.", "error");
+            }
+        }
+
+        function actualizarBotonesVoto(puedeVotar) {
+            const botones = document.querySelectorAll(".vote-button");
+
+            botones.forEach(boton => {
+                boton.disabled = !puedeVotar;
+            });
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const mensaje = document.getElementById("mensaje");
+            mensaje.innerText = texto;
+
+            if (tipo === "success") {
+                mensaje.style.borderColor = "rgba(34, 197, 94, 0.6)";
+                mensaje.style.color = "#86efac";
+            } else if (tipo === "error") {
+                mensaje.style.borderColor = "rgba(239, 68, 68, 0.6)";
+                mensaje.style.color = "#fca5a5";
+            } else {
+                mensaje.style.borderColor = "rgba(148, 163, 184, 0.2)";
+                mensaje.style.color = "#e5e7eb";
+            }
+        }
+
+        function traducirError(error) {
+            if (error.includes("No estas habilitado")) {
+                return "No estás habilitado para votar.";
             }
 
-            document.getElementById("resultados").innerHTML = html;
+            if (error.includes("Ya emitiste")) {
+                return "Ya emitiste tu voto. No se permite votar dos veces.";
+            }
+
+            if (error.includes("Opcion invalida")) {
+                return "La opción seleccionada no es válida.";
+            }
+
+            if (error.includes("revert")) {
+                return "La operación fue rechazada por el contrato inteligente.";
+            }
+
+            return "Ocurrió un error al procesar la operación.";
         }
     </script>
 

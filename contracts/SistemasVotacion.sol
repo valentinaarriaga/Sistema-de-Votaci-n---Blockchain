@@ -13,11 +13,11 @@ contract SistemaVotacion {
 
     Opcion[] public opciones;
 
-    mapping(address => bool) public votantesHabilitados;
-    mapping(address => bool) public haVotado;
+    mapping(bytes32 => bool) public votantesHabilitados;
+    mapping(bytes32 => bool) public haVotado;
 
-    event VotanteHabilitado(address votante);
-    event VotoEmitido(address votante, uint256 opcionId);
+    event VotanteHabilitado(bytes32 hashVotante);
+    event VotoEmitido(bytes32 hashVotante, uint256 opcionId);
 
     constructor() {
         administrador = msg.sender;
@@ -32,20 +32,29 @@ contract SistemaVotacion {
         _;
     }
 
+    function generarHashVotante(address _votante) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_votante));
+    }
+
     function habilitarVotante(address _votante) public soloAdministrador {
-        votantesHabilitados[_votante] = true;
-        emit VotanteHabilitado(_votante);
+        bytes32 hashVotante = generarHashVotante(_votante);
+
+        votantesHabilitados[hashVotante] = true;
+
+        emit VotanteHabilitado(hashVotante);
     }
 
     function votar(uint256 _opcionId) public {
-        require(votantesHabilitados[msg.sender], "No estas habilitado para votar");
-        require(!haVotado[msg.sender], "Ya emitiste tu voto");
+        bytes32 hashVotante = generarHashVotante(msg.sender);
+
+        require(votantesHabilitados[hashVotante], "No estas habilitado para votar");
+        require(!haVotado[hashVotante], "Ya emitiste tu voto");
         require(_opcionId < opciones.length, "Opcion invalida");
 
         opciones[_opcionId].votos++;
-        haVotado[msg.sender] = true;
+        haVotado[hashVotante] = true;
 
-        emit VotoEmitido(msg.sender, _opcionId);
+        emit VotoEmitido(hashVotante, _opcionId);
     }
 
     function consultarVotos(uint256 _opcionId) public view returns (uint256) {
@@ -61,6 +70,17 @@ contract SistemaVotacion {
         require(_opcionId < opciones.length, "Opcion invalida");
 
         Opcion memory opcion = opciones[_opcionId];
+
         return (opcion.id, opcion.nombre, opcion.votos);
+    }
+
+    function consultarSiVoto(address _votante) public view returns (bool) {
+        bytes32 hashVotante = generarHashVotante(_votante);
+        return haVotado[hashVotante];
+    }
+
+    function consultarSiEstaHabilitado(address _votante) public view returns (bool) {
+        bytes32 hashVotante = generarHashVotante(_votante);
+        return votantesHabilitados[hashVotante];
     }
 }

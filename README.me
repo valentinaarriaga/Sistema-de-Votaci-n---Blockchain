@@ -1,33 +1,120 @@
 # Sistema de Votación con Blockchain
 
-Proyecto realizado para la materia Base de Datos Avanzada.
+Proyecto académico desarrollado para la materia **Base de Datos Avanzada**.
 
-## Tecnologías utilizadas
+El sistema implementa un proceso de votación descentralizado utilizando Smart Contracts en Ethereum, ejecutados sobre una blockchain local mediante Ganache.
 
+---
+
+# Objetivo del Proyecto
+
+Desarrollar un sistema de votación seguro utilizando tecnología blockchain, permitiendo:
+
+- registrar votantes habilitados,
+- emitir votos de manera segura,
+- evitar el doble voto,
+- consultar resultados en tiempo real,
+- mejorar la privacidad del votante mediante hashing.
+
+---
+
+# Tecnologías Utilizadas
+
+## Blockchain y Smart Contracts
 - Solidity
 - Ethereum
 - Ganache
 - Remix IDE
-- HTML
+- Web3.js
+
+## Frontend
+- HTML5
+- CSS3
 - JavaScript
+
+## Wallet
 - MetaMask
 
-## Funcionalidades implementadas
+---
 
-- Registro de votantes
-- Validación de votante habilitado
+# Funcionalidades Implementadas
+
+## Smart Contract
+
+- Registro de candidatos
+- Habilitación de votantes
+- Validación de votantes habilitados
 - Emisión de voto
 - Prevención de doble voto
 - Consulta de resultados
-- Integración con blockchain local
+- Generación de hash del votante
+- Eventos blockchain para auditoría
 
-## Integrantes
+## Interfaz Web
 
-- Valentina Arriaga
-- Giuliana Bonora
-- Ona Labay
-- Carolina Sánchez
-- Tomás Rodríguez
-- Milagros Murua
-- Diego Real
-- Bianca Luconi
+- Conexión con Ganache
+- Selección dinámica de cuentas
+- Estado del votante en tiempo real
+- Visualización gráfica de resultados
+- Barras de porcentaje automáticas
+- Mensajes de validación amigables
+- Bloqueo automático de voto cuando corresponde
+
+---
+
+# Seguridad Implementada
+
+## Prevención de Doble Voto
+El contrato inteligente impide que una misma cuenta pueda votar más de una vez.
+
+## Validación de Votantes
+Solo las cuentas previamente habilitadas pueden emitir votos.
+
+## Privacidad Básica mediante Hashing
+La identidad del votante se representa mediante un hash criptográfico generado a partir de su dirección blockchain.
+
+## Auditoría Blockchain
+Todas las transacciones quedan registradas en la blockchain local.
+
+---
+
+# Arquitectura del Sistema
+
+Frontend Web  
+⬇  
+Web3.js  
+⬇  
+Smart Contract Solidity  
+⬇  
+Ganache Blockchain Local
+
+---
+
+# Cómo Ejecutar el Proyecto
+
+## 1. Iniciar Ganache
+Abrir Ganache y verificar que esté ejecutándose en:
+
+```bash
+HTTP://127.0.0.1:7545
+
+
+##2. Desplegar el contrato
+Abrir Remix IDE.
+Compilar SistemaVotacion.sol.
+Desplegar el contrato utilizando Ganache.
+Copiar la dirección del contrato desplegado.
+
+
+##3. Configurar el Frontend
+
+En index.html, reemplazar:
+
+const direccionContrato = "DIRECCION_DEL_CONTRATO";
+
+por la dirección obtenida en Remix.
+
+
+##4. Ejecutar el Frontend
+
+Abrir el proyecto ejecutando: http://127.0.0.1:5500/frontend/index.html
